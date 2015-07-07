@@ -1,0 +1,25 @@
+{
+  "name": "webRTCdemo",
+  "version": "0.0.1",
+  "description": "simple demo with webRTC",
+  "dependencies": {
+    "web-node-server": "0.0.5"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "main": "server.js",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:younger/webRTCdemo.git"
+  },
+  "keywords": [
+    "webRTCdemo"
+  ],
+  "author": "younger@blog.timehub.cc",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/younger/webRTCdemo/issues"
+  },
+  "homepage": "https://github.com/younger/webRTCdemo"
+}
