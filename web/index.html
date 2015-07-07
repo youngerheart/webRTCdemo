@@ -2,20 +2,25 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>GetUserMedia实例</title>
+    <title>webRTCdemo</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
-    <video id="video" autoplay></video>
+  <div id="chat">
+    <div class="msgs" id="msgs"></div>
+    <input type="file" id="fileInput" class="fileInput">
+    <button id="sendFileBtn" class="sendFileBtn">发送文件</button>
+    <input type="text" id="msgInput" class="msgInput">
+    <button id="sendBtn" class="sendBtn">发送</button>
+  </div>
+  <div id="videos">
+    <video id="me" autoplay></video>
+  </div>
+  <div id="files">
+  </div>
 </body>
 
 <script type="text/javascript" src="webRTC.js"></script>
-<script type="text/javascript">
-var config = {
-  videoObj: document.getElementById('video')
-}
-var webRTC = new webRTC(config);
-
-</script>
-
+<script type="text/javascript" src="base.js"></script>
 
 </html>
