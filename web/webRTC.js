@@ -298,6 +298,6 @@ var webRTC = function() {
     return channel;
   };
 
-  return new skyrtc();
+  return new webrtc();
 };
 
