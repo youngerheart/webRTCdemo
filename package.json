@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "description": "simple demo with webRTC",
   "dependencies": {
-    "web-node-server": "0.0.5"
+    "web-node-server": "0.0.5",
+    "node-uuid": "1.4.2"
   },
   "scripts": {
     "start": "node server.js"

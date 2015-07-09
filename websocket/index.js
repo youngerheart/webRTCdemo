@@ -1,3 +1,5 @@
+var uuid = require('node-uuid');
+
 exports.init = function() {
   var crypto=require('crypto');
   var WS='258EAFA5-E914-47DA-95CA-C5AB0DC85B11';
@@ -56,25 +58,54 @@ exports.init = function() {
     return frame;
   }
 
+  var encodeDataFrame = function(data){
+    var head = [];
+    var body = new Buffer(data.PayloadData);
+    var l = body.length;
+    //输入第一个字节
+    head.push((e.FIN << 7) + data.Opcode);
+    //输入第二个字节，判断它的长度并放入相应的后续长度消息
+    //永远不使用掩码
+    if(l < 126) {
+      head.push(l);
+    } else if(l < 0x10000) {
+      head.push(126, (l & 0xFF00) >> 8,l & 0xFF);
+    } else {
+      head.push(
+        127, 0, 0, 0, 0, //8字节数据，前4字节一般没用留空
+        (l&0xFF000000)>>24,(l&0xFF0000)>>16,(l&0xFF00)>>8,l&0xFF
+      );
+    }
+    //返回头部分和数据部分的合并缓冲区
+    return Buffer.concat([new Buffer(head), body]);
+  };
+
 
   Socket.prototype.start = function(port) {
     var that = this;
     require('net').createServer(function(o){
       var key;
+      var socketId;
       var socket = new Socket();
       o.on('data',function(buffer){
         if(!key){
-          //获取发送过来的KEY
-          key=buffer.toString().match(/Sec-WebSocket-Key: (.+)/)[1];
-          //连接上WS这个字符串，并做一次sha1运算，最后转换成Base64
-          key=crypto.createHash('sha1').update(key + WS).digest('base64');
-          //输出返回给客户端的数据，这些字段都是必须的
+          // 获取发送过来的KEY
+          var head = buffer.toString();
+          key = head.match(/Sec-WebSocket-Key: (.+)/)[1];
+          // 连接上WS这个字符串，并做一次sha1运算，最后转换成Base64
+          key = crypto.createHash('sha1').update(key + WS).digest('base64');
+          // 解析出socketId
+          socketId = head.match(/Cookie: (.+)/)[1];
+          if(socketId) socketId = socketId.match(/socketId=(.+)(?:;)?(?: )?/)[1];
+          // 输出返回给客户端的数据，这些字段都是必须的
           o.write('HTTP/1.1 101 Switching Protocols\r\n');
           o.write('Upgrade: websocket\r\n');
           o.write('Connection: Upgrade\r\n');
-          //这个字段带上服务器处理后的KEY
+          // 这个字段带上服务器处理后的KEY
           o.write('Sec-WebSocket-Accept: ' + key + '\r\n');
-          //输出空行，使HTTP头结束
+          // 做一个cookieID
+          if(!socketId) o.write('Set-Cookie: socketId=' + uuid.v4());
+          // 输出空行，使HTTP头结束
           o.write('\r\n');
         }else{
           //数据处理
@@ -82,7 +113,7 @@ exports.init = function() {
           if(!json || json.Opcode !== 1) return;
           data = JSON.parse(json.PayloadData);
           // bind events
-          if(data.event) that.emit(data.event, data.data);
+          if(data.event) that.emit(data.event, data.data, socketId);
         };
       });
     }).listen(port);
