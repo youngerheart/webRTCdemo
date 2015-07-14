@@ -9,8 +9,5 @@ config = {
 var server = require('web-node-server');
 server.start(config);
 
-var ws = require('./websocket').init();
-ws.on('join', function(data, socketId) {
-  console.log(data, socketId);
-});
+var ws = require('node-websocket').init;
 ws.start(8000);

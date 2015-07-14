@@ -4,7 +4,8 @@
   "description": "simple demo with webRTC",
   "dependencies": {
     "web-node-server": "0.0.5",
-    "node-uuid": "1.4.2"
+    "node-uuid": "1.4.2",
+    "node-websocket": ">=0.0.1"
   },
   "scripts": {
     "start": "node server.js"
