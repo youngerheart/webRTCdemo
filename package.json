@@ -5,7 +5,7 @@
   "dependencies": {
     "web-node-server": "0.0.5",
     "node-uuid": "1.4.2",
-    "node-websocket": ">=0.0.1"
+    "node-websocket": ">=0.1.4"
   },
   "scripts": {
     "start": "node server.js"

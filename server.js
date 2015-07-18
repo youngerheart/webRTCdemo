@@ -9,33 +9,30 @@ config = {
 var server = require('web-node-server');
 server.start(config);
 
-var sockets = [];
+var sockets = {};
 var rooms = {};
 
 var addSocket = function(socket) {
-  sockets.push(socket);
+  sockets[socket.id] = socket;
 };
 
 var getSocket = function(id) {
-  for(var i = 0; i < sockets.length; i ++) {
-    if(id === sockets[i].id) return sockets[i];
-  }
-  return;
+  return sockets[i];
 }
 
 var ws = require('node-websocket').init;
 ws.on('connection', function(socket) {
 
   ws.on('__join', function(data) {
-    console.log('__join');
+    console.log('__join ');
     conns = [];
-    sockets.push(socket);
-    for(var i =0; i < sockets.length; i ++) {
-      if (sockets[i].id === socket.id) {
+    addSocket(socket);
+    for(var key in sockets) {
+      if (key === socket.id) {
         continue;
       }
-      conns.push(sockets[i].id);
-      sockets[i].send(JSON.stringify({
+      conns.push(key);
+      sockets[key].send(JSON.stringify({
         'eventName': '_new_peer',
         'data': {
           'socketId': socket.id
@@ -93,6 +90,11 @@ ws.on('connection', function(socket) {
       }));
     }
   });
+});
+
+ws.on('close', function(socketId) {
+ console.log('close ' + socketId);
+ delete sockets[socketId];
 });
 
 ws.start(8000);
