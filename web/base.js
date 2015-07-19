@@ -1,3 +1,5 @@
+// 和ui相关的交互操作
+
 var $el = function(name) {
   return document.getElementById(name);
 };

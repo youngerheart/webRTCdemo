@@ -9,7 +9,9 @@ config = {
 var server = require('web-node-server');
 server.start(config);
 
+// 储存所有的socket对象，key为socketId
 var sockets = {};
+// 这个东西之后再实现吧，房间功能 = =
 var rooms = {};
 
 var addSocket = function(socket) {
@@ -20,9 +22,10 @@ var getSocket = function(id) {
   return sockets[id];
 }
 
+// 自己做的websocket功能封装
 var ws = require('node-websocket').init;
 ws.on('connection', function(socket) {
-
+  // join的时候保存socket对象，向远端发送new_peer事件，向本端发送peers事件
   ws.on('__join', function(data) {
     console.log('__join ');
     conns = [];
@@ -48,6 +51,7 @@ ws.on('connection', function(socket) {
     }));
   });
 
+  // 穿透NAT后，向远端发送穿透信息
   ws.on('__ice_candidate', function(data) {
     console.log('__ice_candidate');
     var soc = getSocket(data.socketId);
@@ -63,6 +67,7 @@ ws.on('connection', function(socket) {
     }
   });
 
+  // 向远端发送offer信息
   ws.on('__offer', function(data){
     console.log('__offer');
     var soc = getSocket(data.socketId);
@@ -77,6 +82,7 @@ ws.on('connection', function(socket) {
     }
   });
 
+  // 回传给本端的answer信息
   ws.on('__answer', function(data){
     console.log('__answer');
     var soc = getSocket(data.socketId);
@@ -92,10 +98,10 @@ ws.on('connection', function(socket) {
   });
 });
 
+// 某个连接断开了，删除这个连接的socket对象，同时告诉其他人
 ws.on('close', function(socketId) {
   console.log('close ' + socketId);
   delete sockets[socketId];
-  // 这里需要告诉其他人
   for(var key in sockets) {
    sockets[key].send(JSON.stringify({
     eventName: '_remove_peer',
