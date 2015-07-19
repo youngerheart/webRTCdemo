@@ -17,7 +17,7 @@ var addSocket = function(socket) {
 };
 
 var getSocket = function(id) {
-  return sockets[i];
+  return sockets[id];
 }
 
 var ws = require('node-websocket').init;
@@ -33,17 +33,17 @@ ws.on('connection', function(socket) {
       }
       conns.push(key);
       sockets[key].send(JSON.stringify({
-        'eventName': '_new_peer',
-        'data': {
-          'socketId': socket.id
+        eventName: '_new_peer',
+        data: {
+          socketId: socket.id
         }
       }));
     }
     socket.send(JSON.stringify({
-      'eventName': '_peers',
-      'data': {
-        'connections': conns,
-        'you': socket.id
+      eventName: '_peers',
+      data: {
+        connections: conns,
+        you: socket.id
       }
     }));
   });
@@ -53,11 +53,11 @@ ws.on('connection', function(socket) {
     var soc = getSocket(data.socketId);
     if(soc) {
       soc.send(JSON.stringify({
-        'eventName': '_ice_candidate',
-        'data': {
-          'label': data.label,
-          'candidate': data.candidate,
-          'socketId': data.me
+        eventName: '_ice_candidate',
+        data: {
+          label: data.label,
+          candidate: data.candidate,
+          socketId: data.me
         }
       }));
     }
@@ -68,10 +68,10 @@ ws.on('connection', function(socket) {
     var soc = getSocket(data.socketId);
     if(soc) {
       soc.send(JSON.stringify({
-        'eventName': '_offer',
-        'data': {
-          'desc': data.desc,
-          'socketId': data.me
+        eventName: '_offer',
+        data: {
+          desc: data.desc,
+          socketId: data.me
         }
       }));
     }
@@ -82,10 +82,10 @@ ws.on('connection', function(socket) {
     var soc = getSocket(data.socketId);
     if(soc) {
       soc.send(JSON.stringify({
-        'eventName': "_answer",
-        'data': {
-          'desc': data.desc,
-          'socketId': data.me
+        eventName: "_answer",
+        data: {
+          desc: data.desc,
+          socketId: data.me
         }
       }));
     }
@@ -93,8 +93,17 @@ ws.on('connection', function(socket) {
 });
 
 ws.on('close', function(socketId) {
- console.log('close ' + socketId);
- delete sockets[socketId];
+  console.log('close ' + socketId);
+  delete sockets[socketId];
+  // 这里需要告诉其他人
+  for(var key in sockets) {
+   sockets[key].send(JSON.stringify({
+    eventName: '_remove_peer',
+    data: {
+      'socketId': socketId
+    }
+  }));
+  }
 });
 
 ws.start(8000);
